@@ -1,0 +1,240 @@
+{
+  "id": "aptitude-mock-1",
+  "title": "General Aptitude Mock Test",
+  "description": "Quantitative aptitude, logical reasoning and verbal ability — the format used by bank, SSC and campus placement exams.",
+  "durationMinutes": 25,
+  "instructions": [
+    "The test has 3 sections and 17 questions. You can switch sections at any time.",
+    "Each correct answer earns +4. Each wrong answer costs −1 unless stated otherwise.",
+    "Multiple-correct questions in Logical Reasoning award partial marks when every option you pick is correct.",
+    "Only answers saved with “Save & Next” or “Save & Mark for Review” are evaluated.",
+    "The test submits automatically when the timer reaches zero."
+  ],
+  "sections": [
+    {
+      "id": "quant",
+      "name": "Quantitative Aptitude",
+      "marking": { "correct": 4, "incorrect": 1 },
+      "questions": [
+        {
+          "id": "q1",
+          "type": "single",
+          "text": "A shirt is sold for ₹1,200 after a 20% discount. What was its marked price?",
+          "options": [
+            { "id": "a", "text": "₹1,440" },
+            { "id": "b", "text": "₹1,500" },
+            { "id": "c", "text": "₹1,520" },
+            { "id": "d", "text": "₹1,600" }
+          ],
+          "answer": "b",
+          "solution": "Selling price = 80% of marked price, so marked price = 1200 ÷ 0.8 = ₹1,500."
+        },
+        {
+          "id": "q2",
+          "type": "numeric",
+          "text": "What is the simple interest (in ₹) on ₹8,000 at 6% per annum for 3 years?",
+          "answer": 1440,
+          "solution": "SI = P × R × T / 100 = 8000 × 6 × 3 / 100 = ₹1,440."
+        },
+        {
+          "id": "q3",
+          "type": "single",
+          "text": "A 240 m long train passes a pole in 12 seconds. What is its speed?",
+          "options": [
+            { "id": "a", "text": "60 km/h" },
+            { "id": "b", "text": "66 km/h" },
+            { "id": "c", "text": "72 km/h" },
+            { "id": "d", "text": "80 km/h" }
+          ],
+          "answer": "c",
+          "solution": "Speed = 240 / 12 = 20 m/s = 20 × 18/5 = 72 km/h."
+        },
+        {
+          "id": "q4",
+          "type": "single",
+          "text": "A can finish a job in 10 days and B in 15 days. How long will they take working together?",
+          "options": [
+            { "id": "a", "text": "5 days" },
+            { "id": "b", "text": "6 days" },
+            { "id": "c", "text": "7.5 days" },
+            { "id": "d", "text": "8 days" }
+          ],
+          "answer": "b",
+          "solution": "Combined rate = 1/10 + 1/15 = 1/6 of the job per day, so 6 days."
+        },
+        {
+          "id": "q5",
+          "type": "numeric",
+          "text": "If 3x + 7 = 25, what is the value of x?",
+          "answer": 6,
+          "solution": "3x = 18, so x = 6."
+        },
+        {
+          "id": "q6",
+          "type": "numeric",
+          "text": "A sum of money doubles in 5 years at compound interest (compounded yearly). What is the annual rate of interest, in %? (Answer to 2 decimal places.)",
+          "answer": 14.87,
+          "tolerance": 0.1,
+          "solution": "(1 + r)^5 = 2 ⇒ r = 2^(1/5) − 1 ≈ 0.1487, i.e. about 14.87%."
+        }
+      ]
+    },
+    {
+      "id": "reasoning",
+      "name": "Logical Reasoning",
+      "marking": { "correct": 4, "incorrect": 1, "partial": true },
+      "questions": [
+        {
+          "id": "r1",
+          "type": "single",
+          "text": "Find the next number: 2, 6, 12, 20, 30, ?",
+          "options": [
+            { "id": "a", "text": "40" },
+            { "id": "b", "text": "42" },
+            { "id": "c", "text": "44" },
+            { "id": "d", "text": "48" }
+          ],
+          "answer": "b",
+          "solution": "The terms are n(n + 1): 1·2, 2·3, 3·4, 4·5, 5·6, so next is 6·7 = 42."
+        },
+        {
+          "id": "r2",
+          "type": "single",
+          "text": "If CODE is written as DPEF, how is LAMP written in that code?",
+          "options": [
+            { "id": "a", "text": "MBNQ" },
+            { "id": "b", "text": "MBNP" },
+            { "id": "c", "text": "KZLO" },
+            { "id": "d", "text": "MCNQ" }
+          ],
+          "answer": "a",
+          "solution": "Each letter moves one place forward: L→M, A→B, M→N, P→Q."
+        },
+        {
+          "id": "r3",
+          "type": "multiple",
+          "text": "Which of the following numbers are prime? (Select all that apply.)",
+          "options": [
+            { "id": "a", "text": "21" },
+            { "id": "b", "text": "23" },
+            { "id": "c", "text": "29" },
+            { "id": "d", "text": "33" }
+          ],
+          "answer": ["b", "c"],
+          "solution": "21 = 3 × 7 and 33 = 3 × 11 are composite; 23 and 29 are prime."
+        },
+        {
+          "id": "r4",
+          "type": "single",
+          "text": "Pointing to a man, Riya says, “His mother is the only daughter of my mother.” How is the man related to Riya?",
+          "options": [
+            { "id": "a", "text": "Brother" },
+            { "id": "b", "text": "Son" },
+            { "id": "c", "text": "Nephew" },
+            { "id": "d", "text": "Cousin" }
+          ],
+          "answer": "b",
+          "solution": "The only daughter of Riya's mother is Riya herself, so the man's mother is Riya: he is her son."
+        },
+        {
+          "id": "r5",
+          "type": "single",
+          "text": "Which one is the odd one out?",
+          "options": [
+            { "id": "a", "text": "Square" },
+            { "id": "b", "text": "Rectangle" },
+            { "id": "c", "text": "Triangle" },
+            { "id": "d", "text": "Rhombus" }
+          ],
+          "answer": "c",
+          "solution": "All the others are quadrilaterals (four sides)."
+        },
+        {
+          "id": "r6",
+          "type": "multiple",
+          "text": "Statements: All roses are flowers. All flowers are plants. Which conclusions definitely follow? (Select all that apply.)",
+          "options": [
+            { "id": "a", "text": "All roses are plants." },
+            { "id": "b", "text": "Some plants are roses." },
+            { "id": "c", "text": "All plants are flowers." },
+            { "id": "d", "text": "Some flowers are roses." }
+          ],
+          "answer": ["a", "b", "d"],
+          "solution": "Roses ⊂ flowers ⊂ plants gives (a); (b) and (d) follow by conversion. (c) reverses the second statement and does not follow."
+        }
+      ]
+    },
+    {
+      "id": "verbal",
+      "name": "Verbal Ability",
+      "marking": { "correct": 4, "incorrect": 1 },
+      "questions": [
+        {
+          "id": "v1",
+          "type": "single",
+          "text": "Choose the word closest in meaning to METICULOUS.",
+          "options": [
+            { "id": "a", "text": "Careful" },
+            { "id": "b", "text": "Careless" },
+            { "id": "c", "text": "Hasty" },
+            { "id": "d", "text": "Noisy" }
+          ],
+          "answer": "a",
+          "solution": "Meticulous means showing great attention to detail — careful."
+        },
+        {
+          "id": "v2",
+          "type": "single",
+          "text": "Choose the word opposite in meaning to SCARCE.",
+          "options": [
+            { "id": "a", "text": "Rare" },
+            { "id": "b", "text": "Abundant" },
+            { "id": "c", "text": "Limited" },
+            { "id": "d", "text": "Meagre" }
+          ],
+          "answer": "b",
+          "solution": "Scarce means in short supply; the opposite is abundant."
+        },
+        {
+          "id": "v3",
+          "type": "single",
+          "text": "Which word is spelt correctly?",
+          "options": [
+            { "id": "a", "text": "Accommodate" },
+            { "id": "b", "text": "Acommodate" },
+            { "id": "c", "text": "Accomodate" },
+            { "id": "d", "text": "Acomodate" }
+          ],
+          "answer": "a",
+          "solution": "Accommodate has a double “c” and a double “m”."
+        },
+        {
+          "id": "v4",
+          "type": "single",
+          "text": "Fill in the blank: “She has been working here ____ 2019.”",
+          "options": [
+            { "id": "a", "text": "since" },
+            { "id": "b", "text": "for" },
+            { "id": "c", "text": "from" },
+            { "id": "d", "text": "by" }
+          ],
+          "answer": "a",
+          "solution": "Use “since” with a point in time and the present perfect continuous."
+        },
+        {
+          "id": "v5",
+          "type": "single",
+          "text": "What does the idiom “break the ice” mean?",
+          "options": [
+            { "id": "a", "text": "To end a friendship" },
+            { "id": "b", "text": "To start a conversation in an awkward situation" },
+            { "id": "c", "text": "To make a sudden loud noise" },
+            { "id": "d", "text": "To solve a difficult problem" }
+          ],
+          "answer": "b",
+          "solution": "To break the ice is to ease initial tension, typically by starting a conversation."
+        }
+      ]
+    }
+  ]
+}

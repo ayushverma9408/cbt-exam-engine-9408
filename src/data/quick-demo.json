@@ -1,0 +1,72 @@
+{
+  "id": "quick-demo",
+  "title": "5-Minute Quick Demo",
+  "description": "Five questions showing every question type and marking rule.",
+  "durationMinutes": 5,
+  "instructions": [
+    "Five questions: single-correct, multiple-correct (partial marking) and numeric answer.",
+    "+4 for a correct answer, −1 for a wrong one."
+  ],
+  "sections": [
+    {
+      "id": "demo",
+      "name": "Demo",
+      "marking": { "correct": 4, "incorrect": 1, "partial": true },
+      "questions": [
+        {
+          "id": "d1",
+          "type": "single",
+          "text": "Which planet is known as the Red Planet?",
+          "options": [
+            { "id": "a", "text": "Venus" },
+            { "id": "b", "text": "Mars" },
+            { "id": "c", "text": "Jupiter" },
+            { "id": "d", "text": "Mercury" }
+          ],
+          "answer": "b",
+          "solution": "Iron oxide on its surface gives Mars its reddish colour."
+        },
+        {
+          "id": "d2",
+          "type": "numeric",
+          "text": "What is 15% of 240?",
+          "answer": 36,
+          "solution": "0.15 × 240 = 36."
+        },
+        {
+          "id": "d3",
+          "type": "multiple",
+          "text": "Which of these are programming languages? (Select all that apply.)",
+          "options": [
+            { "id": "a", "text": "Python" },
+            { "id": "b", "text": "HTML" },
+            { "id": "c", "text": "TypeScript" },
+            { "id": "d", "text": "C#" }
+          ],
+          "answer": ["a", "c", "d"],
+          "solution": "HTML is a markup language, not a programming language."
+        },
+        {
+          "id": "d4",
+          "type": "single",
+          "text": "The next term of 3, 9, 27, 81 is:",
+          "options": [
+            { "id": "a", "text": "162" },
+            { "id": "b", "text": "216" },
+            { "id": "c", "text": "243" },
+            { "id": "d", "text": "324" }
+          ],
+          "answer": "c",
+          "solution": "Each term is multiplied by 3: 81 × 3 = 243."
+        },
+        {
+          "id": "d5",
+          "type": "numeric",
+          "text": "Area of a circle of radius 7 cm, in cm² (use π = 22/7)?",
+          "answer": 154,
+          "solution": "πr² = 22/7 × 49 = 154 cm²."
+        }
+      ]
+    }
+  ]
+}
