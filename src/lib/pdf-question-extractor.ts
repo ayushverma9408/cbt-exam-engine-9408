@@ -80,7 +80,7 @@ export function parseQuestionText(input: string): ExtractedQuestion[] {
   return blocks.map((block) => {
     const optionPattern = /^\s*(?:\(([A-D])\)|([A-D])[).])\s*/gim;
     const matches = [...block.matchAll(optionPattern)];
-    if (matches.length < 2) return { stem: block.replace(/^\d{1,3}[.)]\s*/, '').trim(), options: [] };
+    if (matches.length < 2) return { stem: block.replace(/^(?:Q(?:uestion)?\s*)?\d{1,3}[.)]\s*/i, '').trim(), options: [] };
 
     const stem = block.slice(0, matches[0].index ?? 0).trim();
     const options = matches.map((match, index) => {
