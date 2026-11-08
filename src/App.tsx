@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ExamRoom, PaletteButton, btn } from './components/ExamRoom';
 import { Results } from './components/Results';
+import { ExamBuilder } from './components/ExamBuilder';
 import aptitude from './data/aptitude-mock.json';
 import quick from './data/quick-demo.json';
 import { reduce, startAttempt, type Action, type AttemptState } from './engine/attempt';
@@ -84,6 +85,23 @@ export default function App() {
 function Home({ onPick }: { onPick: (exam: ExamDef) => void }) {
   const [imported, setImported] = useState<ExamDef[]>(loadImported);
   const [errors, setErrors] = useState<string[] | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  if (creating) {
+    return (
+      <div className="min-h-screen bg-page">
+        <ExamBuilder
+          onCancel={() => setCreating(false)}
+          onSave={(exam) => {
+            const next = [...imported.filter((item) => item.id !== exam.id), exam];
+            setImported(next);
+            saveImported(next);
+            setCreating(false);
+          }}
+        />
+      </div>
+    );
+  }
 
   const importFile = async (file: File) => {
     setErrors(null);
@@ -154,6 +172,16 @@ function Home({ onPick }: { onPick: (exam: ExamDef) => void }) {
               </article>
             );
           })}
+
+          <article className="flex flex-col rounded-2xl border border-brand/30 bg-brand/5 p-5">
+            <h2 className="font-semibold">Create your own JEE paper</h2>
+            <p className="mt-1 text-sm text-muted">
+              Add MCQ, multiple-correct and numerical questions, set the duration, and save a custom test.
+            </p>
+            <button type="button" className={`${btn('primary')} mt-5 self-start`} onClick={() => setCreating(true)}>
+              Open exam builder →
+            </button>
+          </article>
 
           <article className="flex flex-col rounded-2xl border-2 border-dashed border-line-strong p-5">
             <h2 className="font-semibold">Bring your own questions</h2>
