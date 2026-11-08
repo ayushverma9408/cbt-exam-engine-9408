@@ -53,7 +53,7 @@ src/engine/
 │               (tracks per-question time on every navigation)
 └─ scoring.ts   marking schemes, partial marking, numeric tolerance, section + overall analytics
 src/components/ ExamRoom (question, palette, submit dialog) · Results
-src/lib/        localStorage persistence
+src/lib/        localStorage persistence · PDF text/OCR extraction
 ```
 
 ```ts
@@ -76,7 +76,7 @@ CI runs lint, typecheck, tests and build on every push, and `main` deploys to Gi
 
 - [ ] Question images and LaTeX (KaTeX)
 - [ ] Backend for timed attempts, leaderboards and percentile against other candidates
-- [ ] Question bank with tags and difficulty, and random paper generation
+- [ ] Expand the curated question bank and add random paper generation
 - [ ] Proctoring signals (tab switches, fullscreen exit)
 
 ## License
