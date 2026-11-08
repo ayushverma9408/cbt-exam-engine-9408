@@ -135,7 +135,8 @@ export function scoreAttempt(exam: ExamDef, attempt: AttemptState): ExamResult {
     questions,
     attempted,
     accuracy: attempted ? round2((correct / attempted) * 100) : 0,
-    timeTakenMs: (attempt.submittedAt ?? attempt.endsAt) - attempt.startedAt,
+    // Clamp imported or stale persisted timestamps to the configured exam window.
+    timeTakenMs: Math.max(0, Math.min(attempt.endsAt, attempt.submittedAt ?? attempt.endsAt) - attempt.startedAt),
     negativeMarks: round2(-questions.filter((q) => q.marks < 0).reduce((n, q) => n + q.marks, 0)),
   };
 }
