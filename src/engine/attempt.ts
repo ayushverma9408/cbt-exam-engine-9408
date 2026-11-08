@@ -115,10 +115,15 @@ export function reduce(exam: ExamDef, state: AttemptState, action: Action): Atte
       }), next(), action.now);
     }
 
-    case 'mark-next':
+    case 'mark-next': {
+      // NTA-style Mark for Review & Next saves a selected response and marks it.
+      const answered = hasValidAnswer(currentQuestion, currentState.draft);
+      const hasSavedResponse = hasValidAnswer(currentQuestion, currentState.response);
       return move(withCurrent({
-        status: hasValidAnswer(currentQuestion, currentState.response) ? 'answered-marked' : 'marked',
+        response: answered ? currentState.draft : currentState.response,
+        status: answered || hasSavedResponse ? 'answered-marked' : 'marked',
       }), next(), action.now);
+    }
 
     case 'clear':
       return withCurrent({ draft: null, response: null, status: 'not-answered' });
