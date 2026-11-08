@@ -146,9 +146,6 @@ export function ExamRoom({
               >
                 ← Back
               </button>
-              <button type="button" className={btn('purple')} onClick={() => act('save-mark-next')}>
-                Save &amp; Mark for Review
-              </button>
               <button type="button" className={btn('primary')} onClick={() => act('save-next')}>
                 Save &amp; Next →
               </button>
