@@ -65,7 +65,7 @@ export function parseQuestionText(input: string): ExtractedQuestion[] {
   const blocks: string[] = [];
   if (starts.length >= 2) {
     for (let i = 0; i < starts.length; i++) {
-      const start = (starts[i].index ?? 0) + (starts[i][0].length - starts[i][0].trimStart().length);
+      const start = (starts[i].index ?? 0) + starts[i][0].length;
       const end = i + 1 < starts.length ? starts[i + 1].index ?? text.length : text.length;
       const block = text.slice(start, end).trim();
       if (block) blocks.push(block);
@@ -111,7 +111,7 @@ export async function extractQuestionsFromPdf(
     const page = await documentPdf.getPage(pageNumber);
     const content = await page.getTextContent();
     const selectableText = content.items.map((item) => item.str ?? '').join('\n').replace(/[ \t]+/g, ' ').trim();
-    if (selectableText.length >= 60) {
+    const hasQuestionStructure = /(?:^|\\n)\\s*(?:Q(?:uestion)?\\s*)?\\d{1,3}[.)]\\s+|(?:^|\\n)\\s*(?:\\([A-D]\\)|[A-D][).])\\s+/im.test(selectableText);\n    if (selectableText.length >= 60 && hasQuestionStructure) {
       pages.push(selectableText);
       continue;
     }
