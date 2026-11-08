@@ -25,7 +25,7 @@ function parseAttempt(value: unknown, exam: ExamDef): AttemptState | null {
     if (value === null) return true;
     if (question.type === 'numeric') {
       if (typeof value === 'number') return Number.isFinite(value);
-      return draft && typeof value === 'string' && /^-?$|^-?(?:\\d+\\.?\\d*|\\.\\d*)$/.test(value);
+      return draft && typeof value === 'string' && /^-?$|^-?(?:\d+\.?\d*|\.\d*)$/.test(value);
     }
     const optionIds = new Set(question.options.map((option) => option.id));
     if (question.type === 'single') return typeof value === 'string' && optionIds.has(value);
