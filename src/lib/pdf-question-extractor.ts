@@ -23,7 +23,10 @@ declare global {
       }> };
     };
     Tesseract?: {
-      recognize: (image: HTMLCanvasElement, language: string) => Promise<{ data: { text: string } }>;
+      createWorker: (language: string) => Promise<{
+        recognize: (image: HTMLCanvasElement) => Promise<{ data: { text: string } }>;
+        terminate: () => Promise<void>;
+      }>;
     };
   }
 }
@@ -104,9 +107,10 @@ export async function extractQuestionsFromPdf(
   const documentPdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
   if (documentPdf.numPages > 80) throw new Error('This importer currently supports up to 80 pages per PDF.');
 
-  let ocrReady = false;
+  let ocrWorker: Awaited<ReturnType<NonNullable<Window['Tesseract']>['createWorker']>> | null = null;
   const pages: string[] = [];
-  for (let pageNumber = 1; pageNumber <= documentPdf.numPages; pageNumber++) {
+  try {
+    for (let pageNumber = 1; pageNumber <= documentPdf.numPages; pageNumber++) {
     onProgress({ page: pageNumber, total: documentPdf.numPages, stage: 'reading' });
     const page = await documentPdf.getPage(pageNumber);
     const content = await page.getTextContent();
@@ -116,10 +120,10 @@ export async function extractQuestionsFromPdf(
       continue;
     }
 
-    if (!ocrReady) {
+    if (!ocrWorker) {
       await loadScript(TESSERACT_URL, 'tesseract');
       if (!window.Tesseract) throw new Error('OCR engine did not initialize. Refresh and try again.');
-      ocrReady = true;
+      ocrWorker = await window.Tesseract.createWorker('eng');
     }
     onProgress({ page: pageNumber, total: documentPdf.numPages, stage: 'ocr' });
     const viewport = page.getViewport({ scale: 1.8 });
@@ -129,10 +133,13 @@ export async function extractQuestionsFromPdf(
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Could not prepare a page for OCR.');
     await page.render({ canvasContext: context, viewport }).promise;
-    const recognized = await window.Tesseract!.recognize(canvas, 'eng');
+    const recognized = await ocrWorker.recognize(canvas);
     pages.push(recognized.data.text);
     canvas.width = 0;
     canvas.height = 0;
+    }
+  } finally {
+    if (ocrWorker) await ocrWorker.terminate();
   }
 
   const questions = parseQuestionText(pages.join('\n'));
