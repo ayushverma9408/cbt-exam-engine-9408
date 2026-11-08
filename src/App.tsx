@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ExamRoom, PaletteButton, btn } from './components/ExamRoom';
 import { Results } from './components/Results';
 import { ExamBuilder } from './components/ExamBuilder';
+import { QuestionBank } from './components/QuestionBank';
 import aptitude from './data/aptitude-mock.json';
 import quick from './data/quick-demo.json';
 import { reduce, startAttempt, type Action, type AttemptState } from './engine/attempt';
@@ -86,6 +87,24 @@ function Home({ onPick }: { onPick: (exam: ExamDef) => void }) {
   const [imported, setImported] = useState<ExamDef[]>(loadImported);
   const [errors, setErrors] = useState<string[] | null>(null);
   const [creating, setCreating] = useState(false);
+  const [browsingBank, setBrowsingBank] = useState(false);
+
+  if (browsingBank) {
+    return (
+      <div className="min-h-screen bg-page">
+        <QuestionBank
+          onCancel={() => setBrowsingBank(false)}
+          onCreate={(exam) => {
+            const next = [...imported.filter((item) => item.id !== exam.id), exam];
+            setImported(next);
+            saveImported(next);
+            setBrowsingBank(false);
+            onPick(exam);
+          }}
+        />
+      </div>
+    );
+  }
 
   if (creating) {
     return (
@@ -172,6 +191,16 @@ function Home({ onPick }: { onPick: (exam: ExamDef) => void }) {
               </article>
             );
           })}
+
+          <article className="flex flex-col rounded-2xl border border-brand/30 bg-white p-5">
+            <h2 className="font-semibold">JEE question bank</h2>
+            <p className="mt-1 text-sm text-muted">
+              Browse Physics, Chemistry and Mathematics by topic and difficulty. Select questions to assemble a custom mock.
+            </p>
+            <button type="button" className={`${btn('primary')} mt-5 self-start`} onClick={() => setBrowsingBank(true)}>
+              Explore question bank →
+            </button>
+          </article>
 
           <article className="flex flex-col rounded-2xl border border-brand/30 bg-brand/5 p-5">
             <h2 className="font-semibold">Create your own JEE paper</h2>
