@@ -272,8 +272,8 @@ describe('regression fixes', () => {
 
 describe('JEE question bank', () => {
   it('contains original questions across all three JEE subjects', () => {
-    expect(JEE_QUESTION_BANK).toHaveLength(12);
-    expect(new Set(JEE_QUESTION_BANK.map((question) => question.id)).size).toBe(12);
+    expect(JEE_QUESTION_BANK).toHaveLength(15);
+    expect(new Set(JEE_QUESTION_BANK.map((question) => question.id)).size).toBe(15);
     expect(new Set(JEE_QUESTION_BANK.map((question) => question.subject))).toEqual(
       new Set(['Physics', 'Chemistry', 'Mathematics']),
     );
