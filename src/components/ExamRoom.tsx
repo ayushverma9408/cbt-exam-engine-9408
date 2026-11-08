@@ -20,8 +20,18 @@ export function ExamRoom({
   dispatch: (a: Action) => void;
 }) {
   const all = useMemo(() => flatQuestions(exam), [exam]);
-  const q = all.find((x) => x.id === attempt.current)!;
-  const section = exam.sections.find((s) => s.id === q.sectionId)!;
+  const q = all.find((x) => x.id === attempt.current);
+  const section = q ? exam.sections.find((s) => s.id === q.sectionId) : undefined;
+  if (!q || !section || !attempt.questions[q.id]) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-page p-6">
+        <section role="alert" className="max-w-lg rounded-2xl border border-danger/30 bg-white p-6">
+          <h1 className="text-lg font-semibold">This attempt could not be restored</h1>
+          <p className="mt-2 text-sm text-muted">The saved question state does not match this exam. Return to the test list and start a fresh attempt.</p>
+        </section>
+      </main>
+    );
+  }
   const state = attempt.questions[q.id];
   const marking = q.marking ?? section.marking;
   const [confirming, setConfirming] = useState(false);
@@ -39,22 +49,32 @@ export function ExamRoom({
   return (
     <div className="flex h-screen flex-col bg-page">
       {/* Top bar */}
-      <header className="flex items-center gap-4 border-b border-line bg-white px-4 py-2.5">
-        <div className="min-w-0">
-          <div className="truncate font-semibold">{exam.title}</div>
-          <div className="text-xs text-muted">Candidate: Guest · {all.length} questions</div>
+      <header className="border-b border-[#163d65] bg-[#1d4f7a] px-4 py-2.5 text-white">
+        <div className="flex items-center gap-4">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded bg-white/15 text-xs font-bold tracking-wide">JEE</div>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-bold tracking-wide">JOINT ENTRANCE EXAMINATION</div>
+            <div className="text-xs text-white/75">Computer Based Test · {exam.title}</div>
+          </div>
+          <div className="ml-auto text-right">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Time left</div>
+            <div
+              className={`rounded-md px-3 py-1 font-mono text-xl font-bold tabular-nums ${remaining < Math.min(5 * 60_000, exam.durationMinutes * 60_000 * 0.2) ? 'bg-white text-danger' : 'bg-white text-[#1d4f7a]'}`}
+              role="timer"
+              aria-label="Time left"
+            >
+              {clock(remaining)}
+            </div>
+          </div>
         </div>
-        <div
-          className={`ml-auto rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums ${remaining < Math.min(5 * 60_000, exam.durationMinutes * 60_000 * 0.2) ? 'bg-danger/10 text-danger' : 'bg-brand/10 text-brand'}`}
-          role="timer"
-          aria-label="Time left"
-        >
-          {clock(remaining)}
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-white/15 pt-2 text-xs text-white/80">
+          <span>Candidate: Guest</span>
+          <span>{all.length} questions · {exam.sections.length} sections</span>
         </div>
       </header>
 
       {/* Section tabs */}
-      <nav className="flex gap-1 overflow-x-auto border-b border-line bg-white px-3" aria-label="Sections">
+      <nav className="flex gap-1 overflow-x-auto border-b border-line bg-[#eaf1f8] px-3" aria-label="Sections">
         {exam.sections.map((s) => {
           const ids = s.questions.map((x) => x.id);
           const answered = ids.filter((id) =>
@@ -82,7 +102,7 @@ export function ExamRoom({
         {/* Question */}
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="flex items-center justify-between border-b border-line bg-white px-5 py-2.5 text-sm">
-            <span className="font-semibold">Question {q.number}</span>
+            <span className="font-semibold text-[#1d4f7a]">Question {q.number} <span className="ml-2 font-normal text-muted">({section.name})</span></span>
             <span className="flex gap-3 text-xs text-muted">
               <span>
                 {q.type === 'single'
