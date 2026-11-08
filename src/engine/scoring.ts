@@ -68,7 +68,12 @@ export function scoreQuestion(
     }
 
     case 'multiple': {
-      const chosen = new Set(Array.isArray(response) ? response : [String(response)]);
+      const selected = Array.isArray(response) ? response : [String(response)];
+      const optionIds = new Set(q.options.map((option) => option.id));
+      if (selected.some((id) => !optionIds.has(id)) || new Set(selected).size !== selected.length) {
+        return { outcome: 'incorrect', marks: -marking.incorrect };
+      }
+      const chosen = new Set(selected);
       const correct = new Set(q.answer);
       const wrongPicked = [...chosen].some((c) => !correct.has(c));
       if (wrongPicked) return { outcome: 'incorrect', marks: -marking.incorrect };
