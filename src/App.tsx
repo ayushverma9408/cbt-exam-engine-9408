@@ -3,6 +3,7 @@ import { ExamRoom, PaletteButton, btn } from './components/ExamRoom';
 import { Results } from './components/Results';
 import { ExamBuilder } from './components/ExamBuilder';
 import { QuestionBank } from './components/QuestionBank';
+import { PdfQuestionImporter } from './components/PdfQuestionImporter';
 import aptitude from './data/aptitude-mock.json';
 import quick from './data/quick-demo.json';
 import { reduce, startAttempt, type Action, type AttemptState } from './engine/attempt';
@@ -88,6 +89,7 @@ function Home({ onPick }: { onPick: (exam: ExamDef) => void }) {
   const [errors, setErrors] = useState<string[] | null>(null);
   const [creating, setCreating] = useState(false);
   const [browsingBank, setBrowsingBank] = useState(false);
+  const [importingPdf, setImportingPdf] = useState(false);
 
   if (browsingBank) {
     return (
@@ -99,6 +101,23 @@ function Home({ onPick }: { onPick: (exam: ExamDef) => void }) {
             setImported(next);
             saveImported(next);
             setBrowsingBank(false);
+            onPick(exam);
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (importingPdf) {
+    return (
+      <div className="min-h-screen bg-page">
+        <PdfQuestionImporter
+          onCancel={() => setImportingPdf(false)}
+          onCreate={(exam) => {
+            const next = [...imported.filter((item) => item.id !== exam.id), exam];
+            setImported(next);
+            saveImported(next);
+            setImportingPdf(false);
             onPick(exam);
           }}
         />
@@ -191,6 +210,16 @@ function Home({ onPick }: { onPick: (exam: ExamDef) => void }) {
               </article>
             );
           })}
+
+          <article className="flex flex-col rounded-2xl border border-brand/30 bg-white p-5">
+            <h2 className="font-semibold">Import questions from PDF</h2>
+            <p className="mt-1 text-sm text-muted">
+              Extract selectable text or run OCR on scanned question papers. Review the answer keys, then create a test.
+            </p>
+            <button type="button" className={`${btn('primary')} mt-5 self-start`} onClick={() => setImportingPdf(true)}>
+              Open PDF question importer →
+            </button>
+          </article>
 
           <article className="flex flex-col rounded-2xl border border-brand/30 bg-white p-5">
             <h2 className="font-semibold">JEE question bank</h2>
