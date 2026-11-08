@@ -141,6 +141,8 @@ describe('scoreQuestion', () => {
     expect(scoreQuestion(q3, marking, ['a'])).toEqual({ outcome: 'partial', marks: 2 });
     expect(scoreQuestion(q3, marking, ['a', 'c'])).toEqual({ outcome: 'incorrect', marks: -2 });
     expect(scoreQuestion(q3, { ...marking, partial: false }, ['a']).outcome).toBe('incorrect');
+    expect(scoreQuestion(q3, marking, ['a', 'a', 'b']).outcome).toBe('incorrect');
+    expect(scoreQuestion(q3, marking, ['a', 'unknown']).outcome).toBe('incorrect');
   });
 });
 
@@ -199,6 +201,14 @@ describe('attempt reducer', () => {
   it('never reports a negative percentage', () => {
     const s = run({ type: 'draft', value: 'b' }, { type: 'save-next', now: t0 + 1 }, { type: 'submit', now: t0 + 2 });
     expect(scoreAttempt(E, s).percentage).toBe(0);
+  });
+
+  it('does not commit option IDs that are not part of the question', () => {
+    const start = startAttempt(E, t0);
+    const drafted = reduce(E, start, { type: 'draft', value: 'not-an-option' });
+    const saved = reduce(E, drafted, { type: 'save-next', now: t0 + 1_000 });
+    expect(saved.questions.q1.response).toBeNull();
+    expect(saved.questions.q1.status).toBe('not-answered');
   });
 
   it('auto-submits at the deadline instead of accepting a late save', () => {
