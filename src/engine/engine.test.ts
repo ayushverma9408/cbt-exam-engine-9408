@@ -92,6 +92,34 @@ describe('schema', () => {
     });
     expect(dup.ok).toBe(false);
   });
+
+  it('rejects duplicate section and option ids', () => {
+    const duplicateSections = parseExam({ ...E, sections: [E.sections[0], E.sections[0]] });
+    expect(duplicateSections.ok).toBe(false);
+
+    const first = E.sections[0].questions[0];
+    const duplicateOptions = parseExam({
+      ...E,
+      sections: [{
+        ...E.sections[0],
+        questions: [{
+          ...first,
+          options: [{ id: 'same', text: 'A' }, { id: 'same', text: 'B' }],
+          answer: 'same',
+        }],
+      }],
+    });
+    expect(duplicateOptions.ok).toBe(false);
+  });
+
+  it('rejects duplicate answers in a multiple-correct question', () => {
+    const multiple = E.sections[1].questions[0];
+    const duplicateAnswers = parseExam({
+      ...E,
+      sections: [{ ...E.sections[1], questions: [{ ...multiple, answer: ['a', 'a'] }] }],
+    });
+    expect(duplicateAnswers.ok).toBe(false);
+  });
 });
 
 describe('scoreQuestion', () => {
@@ -171,6 +199,22 @@ describe('attempt reducer', () => {
   it('never reports a negative percentage', () => {
     const s = run({ type: 'draft', value: 'b' }, { type: 'save-next', now: t0 + 1 }, { type: 'submit', now: t0 + 2 });
     expect(scoreAttempt(E, s).percentage).toBe(0);
+  });
+
+  it('auto-submits at the deadline instead of accepting a late save', () => {
+    const start = startAttempt(E, t0);
+    const drafted = reduce(E, start, { type: 'draft', value: 'a' });
+    const lateSave = reduce(E, drafted, { type: 'save-next', now: start.endsAt + 5_000 });
+    expect(lateSave.submittedAt).toBe(start.endsAt);
+    expect(lateSave.questions.q1.response).toBeNull();
+    expect(lateSave.questions.q1.status).toBe('not-answered');
+  });
+
+  it('clamps manual submission time to the exam duration', () => {
+    const start = startAttempt(E, t0);
+    const submitted = reduce(E, start, { type: 'submit', now: start.endsAt + 30_000 });
+    expect(submitted.submittedAt).toBe(start.endsAt);
+    expect(scoreAttempt(E, submitted).timeTakenMs).toBe(start.endsAt - start.startedAt);
   });
 });
 
