@@ -10,24 +10,48 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function parseAttempt(value: unknown, exam: ExamDef): AttemptState | null {
   if (!isRecord(value)) return null;
   const { examId, startedAt, endsAt, current, questions, submittedAt, enteredAt } = value;
+  const expectedEnd = typeof startedAt === 'number' ? startedAt + exam.durationMinutes * 60_000 : NaN;
   if (examId !== exam.id || typeof startedAt !== 'number' || !Number.isFinite(startedAt) ||
-      typeof endsAt !== 'number' || !Number.isFinite(endsAt) || endsAt < startedAt ||
-      typeof enteredAt !== 'number' || !Number.isFinite(enteredAt) ||
-      (submittedAt !== null && (typeof submittedAt !== 'number' || !Number.isFinite(submittedAt))) ||
+      typeof endsAt !== 'number' || !Number.isFinite(endsAt) || endsAt !== expectedEnd ||
+      typeof enteredAt !== 'number' || !Number.isFinite(enteredAt) || enteredAt < startedAt || enteredAt > endsAt ||
+      (submittedAt !== null && (typeof submittedAt !== 'number' || !Number.isFinite(submittedAt) || submittedAt < startedAt || submittedAt > endsAt)) ||
       typeof current !== 'string' || !isRecord(questions)) return null;
-  const ids = exam.sections.flatMap((section) => section.questions.map((q) => q.id));
+
+  const definitions = new Map(exam.sections.flatMap((section) => section.questions.map((question) => [question.id, question] as const)));
+  const ids = [...definitions.keys()];
   if (!ids.includes(current) || ids.length !== Object.keys(questions).length) return null;
+
+  const isStoredValue = (value: unknown, question: (typeof exam.sections)[number]['questions'][number], draft: boolean) => {
+    if (value === null) return true;
+    if (question.type === 'numeric') {
+      if (typeof value === 'number') return Number.isFinite(value);
+      return draft && typeof value === 'string' && /^-?$|^-?(?:\\d+\\.?\\d*|\\.\\d*)$/.test(value);
+    }
+    const optionIds = new Set(question.options.map((option) => option.id));
+    if (question.type === 'single') return typeof value === 'string' && optionIds.has(value);
+    return Array.isArray(value) && value.every((item) => typeof item === 'string' && optionIds.has(item)) &&
+      new Set(value).size === value.length;
+  };
+
   const parsed: Record<string, QuestionState> = {};
+  let totalTimeSpent = 0;
   for (const id of ids) {
-    const q = questions[id];
-    if (!isRecord(q) || !STATUSES.includes(q.status as Status) ||
-        typeof q.timeSpentMs !== 'number' || !Number.isFinite(q.timeSpentMs) || q.timeSpentMs < 0 ||
-        !(q.response === null || typeof q.response === 'string' || (typeof q.response === 'number' && Number.isFinite(q.response)) ||
-          (Array.isArray(q.response) && q.response.every((x) => typeof x === 'string'))) ||
-        !(q.draft === null || typeof q.draft === 'string' || (typeof q.draft === 'number' && Number.isFinite(q.draft)) ||
-          (Array.isArray(q.draft) && q.draft.every((x) => typeof x === 'string')))) return null;
-    parsed[id] = q as unknown as QuestionState;
+    const saved = questions[id];
+    const definition = definitions.get(id)!;
+    if (!isRecord(saved) || !STATUSES.includes(saved.status as Status) ||
+        typeof saved.timeSpentMs !== 'number' || !Number.isFinite(saved.timeSpentMs) || saved.timeSpentMs < 0 ||
+        saved.timeSpentMs > exam.durationMinutes * 60_000 ||
+        !isStoredValue(saved.response, definition, false) || !isStoredValue(saved.draft, definition, true)) return null;
+
+    const responsePresent = saved.response !== null &&
+      !(Array.isArray(saved.response) && saved.response.length === 0) && saved.response !== '';
+    if ((saved.status === 'answered' || saved.status === 'answered-marked') !== responsePresent) return null;
+    if ((saved.status === 'not-visited' || saved.status === 'not-answered' || saved.status === 'marked') && responsePresent) return null;
+
+    totalTimeSpent += saved.timeSpentMs;
+    parsed[id] = saved as unknown as QuestionState;
   }
+  if (totalTimeSpent > exam.durationMinutes * 60_000) return null;
   return { examId, startedAt, endsAt, current, questions: parsed, submittedAt, enteredAt };
 }
 function parseSaved(value: unknown): Saved | null {
