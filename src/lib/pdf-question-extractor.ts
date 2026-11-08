@@ -110,7 +110,7 @@ export async function extractQuestionsFromPdf(
     onProgress({ page: pageNumber, total: documentPdf.numPages, stage: 'reading' });
     const page = await documentPdf.getPage(pageNumber);
     const content = await page.getTextContent();
-    const selectableText = content.items.map((item) => item.str ?? '').join(' ').replace(/\s+/g, ' ').trim();
+    const selectableText = content.items.map((item) => item.str ?? '').join('\n').replace(/[ \t]+/g, ' ').trim();
     if (selectableText.length >= 60) {
       pages.push(selectableText);
       continue;
