@@ -44,8 +44,13 @@ export const hasValue = (response: Response | null): response is Response =>
 
 export function hasValidAnswer(question: QuestionDef, response: Response | null): response is Response {
   if (question.type === 'numeric') return typeof response === 'number' && Number.isFinite(response);
-  if (question.type === 'multiple') return Array.isArray(response) && response.length > 0;
-  return typeof response === 'string' && response.length > 0;
+  const optionIds = new Set(question.options.map((option) => option.id));
+  if (question.type === 'multiple') {
+    return Array.isArray(response) && response.length > 0 &&
+      response.every((id) => typeof id === 'string' && optionIds.has(id)) &&
+      new Set(response).size === response.length;
+  }
+  return typeof response === 'string' && optionIds.has(response);
 }
 
 export function reduce(exam: ExamDef, state: AttemptState, action: Action): AttemptState {
