@@ -115,7 +115,8 @@ export async function extractQuestionsFromPdf(
     const page = await documentPdf.getPage(pageNumber);
     const content = await page.getTextContent();
     const selectableText = content.items.map((item) => item.str ?? '').join('\n').replace(/[ \t]+/g, ' ').trim();
-    const hasQuestionStructure = /(?:^|\\n)\\s*(?:Q(?:uestion)?\\s*)?\\d{1,3}[.)]\\s+|(?:^|\\n)\\s*(?:\\([A-D]\\)|[A-D][).])\\s+/im.test(selectableText);\n    if (selectableText.length >= 60 && hasQuestionStructure) {
+    const hasQuestionStructure = /(?:^|\n)\s*(?:Q(?:uestion)?\s*)?\d{1,3}[.)]\s+|(?:^|\n)\s*(?:\([A-D]\)|[A-D][).])\s+/im.test(selectableText);
+    if (selectableText.length >= 60 && hasQuestionStructure) {
       pages.push(selectableText);
       continue;
     }
