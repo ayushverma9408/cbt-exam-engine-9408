@@ -203,6 +203,17 @@ describe('attempt reducer', () => {
     expect(scoreAttempt(E, s).percentage).toBe(0);
   });
 
+  it('saves a selected answer when using Mark for Review & Next', () => {
+    const start = startAttempt(E, t0);
+    const drafted = reduce(E, start, { type: 'draft', value: 'a' });
+    const marked = reduce(E, drafted, { type: 'mark-next', now: t0 + 1_000 });
+    expect(marked.questions.q1).toMatchObject({
+      status: 'answered-marked',
+      response: 'a',
+      draft: 'a',
+    });
+  });
+
   it('does not commit option IDs that are not part of the question', () => {
     const start = startAttempt(E, t0);
     const drafted = reduce(E, start, { type: 'draft', value: 'not-an-option' });
