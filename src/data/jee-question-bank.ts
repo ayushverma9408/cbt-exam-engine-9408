@@ -62,6 +62,18 @@ const entries: BankQuestion[] = [
     id: 'math-vec-004', subject: 'Mathematics', topic: 'Vector Algebra', subtopic: 'Dot product', difficulty: 'Medium',
     question: { id: 'math-vec-004', type: 'numeric', text: 'For vectors a = 2i + 3j and b = i − 2j, calculate a · b.', answer: -4, tolerance: 0, solution: 'The dot product is 2×1 + 3×(−2) = 2 − 6 = −4.' },
   },
+  {
+    id: 'phy-elec-005', subject: 'Physics', topic: 'Electrostatics', subtopic: 'Electric field due to point charges', difficulty: 'Hard',
+    question: { id: 'phy-elec-005', type: 'numeric', text: 'Two positive point charges +q and +4q are separated by distance d. At what fraction of d, measured from +q along the line joining them, is the net electric field zero?', answer: 1 / 3, tolerance: 0.001, solution: 'Between the charges, set q/x² = 4q/(d−x)². Taking positive roots gives d−x = 2x, hence x/d = 1/3.' },
+  },
+  {
+    id: 'chem-eq-005', subject: 'Chemistry', topic: 'Chemical Equilibrium', subtopic: 'Equilibrium composition', difficulty: 'Hard',
+    question: { id: 'chem-eq-005', type: 'numeric', text: 'For A ⇌ B, Kc = 4.0 at a fixed temperature. Initially [A] = 1.0 mol L⁻¹ and [B] = 0. Find the equilibrium concentration of B in mol L⁻¹.', answer: 0.8, tolerance: 0.001, solution: 'Let x be the amount converted. Then Kc = x/(1−x) = 4, so 5x = 4 and x = 0.8 mol L⁻¹.' },
+  },
+  {
+    id: 'math-cal-005', subject: 'Mathematics', topic: 'Integral Calculus', subtopic: 'Definite integrals', difficulty: 'Hard',
+    question: { id: 'math-cal-005', type: 'numeric', text: 'Evaluate the definite integral ∫₀¹ [2x/(1+x²)] dx. Give the value correct to three decimal places.', answer: 0.69314718056, tolerance: 0.001, solution: 'An antiderivative is ln(1+x²). Evaluating from 0 to 1 gives ln 2 ≈ 0.693.' },
+  },
 ];
 
 // Validate the complete bundled bank through the same exam schema used by imports.
