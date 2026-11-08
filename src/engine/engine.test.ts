@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import aptitude from '../data/aptitude-mock.json';
 import quick from '../data/quick-demo.json';
+import { JEE_QUESTION_BANK } from '../data/jee-question-bank';
 import { reduce, startAttempt, statusCounts, type AttemptState } from './attempt';
 import { parseExam, type ExamDef } from './schema';
 import { scoreAttempt, scoreQuestion } from './scoring';
@@ -265,5 +266,38 @@ describe('regression fixes', () => {
     const moved = reduce(E, drafted, { type: 'save-next', now: 11_000 });
     expect(moved.questions.q1.response).toBeNull();
     expect(moved.questions.q1.status).toBe('not-answered');
+  });
+});
+
+
+describe('JEE question bank', () => {
+  it('contains original questions across all three JEE subjects', () => {
+    expect(JEE_QUESTION_BANK).toHaveLength(12);
+    expect(new Set(JEE_QUESTION_BANK.map((question) => question.id)).size).toBe(12);
+    expect(new Set(JEE_QUESTION_BANK.map((question) => question.subject))).toEqual(
+      new Set(['Physics', 'Chemistry', 'Mathematics']),
+    );
+  });
+
+  it('keeps every bank question valid under the production exam schema', () => {
+    const parsed = parseExam({
+      id: 'bank-test',
+      title: 'Bank validation',
+      durationMinutes: 30,
+      sections: (['Physics', 'Chemistry', 'Mathematics'] as const).map((subject) => ({
+        id: subject.toLowerCase(),
+        name: subject,
+        marking: { correct: 4, incorrect: 1, partial: false },
+        questions: JEE_QUESTION_BANK.filter((entry) => entry.subject === subject).map((entry) => entry.question),
+      })),
+    });
+    expect(parsed.ok).toBe(true);
+  });
+
+  it('has the correct derivative answer and numeric work-energy value', () => {
+    const derivative = JEE_QUESTION_BANK.find((entry) => entry.id === 'math-cal-001');
+    const workEnergy = JEE_QUESTION_BANK.find((entry) => entry.id === 'phy-wpe-003');
+    expect(derivative?.question).toMatchObject({ type: 'single', answer: 'b' });
+    expect(workEnergy?.question).toMatchObject({ type: 'numeric', answer: 3 * Math.sqrt(2) });
   });
 });
