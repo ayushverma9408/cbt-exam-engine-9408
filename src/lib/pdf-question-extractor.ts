@@ -37,19 +37,22 @@ const TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tess
 
 function loadScript(src: string, marker: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(`script[data-cbt-loader="${marker}"]`);
-    if (existing?.dataset.loaded === 'true') return resolve();
-    if (existing?.dataset.failed === 'true') existing.remove();
-    const script = existing ?? document.createElement('script');
-    const done = () => { script.dataset.loaded = 'true'; resolve(); };
-    const fail = () => { script.dataset.failed = 'true'; reject(new Error(`Could not load ${marker}. Check your internet connection and try again.`)); };
-    script.addEventListener('load', done, { once: true });
-    script.addEventListener('error', fail, { once: true });
-    if (!existing) {
-      script.src = src;
-      script.async = true;
-      script.dataset.cbtLoader = marker;
-      document.head.appendChild(script);
+    let script = document.querySelector<HTMLScriptElement>(`script[data-cbt-loader="${marker}"]`);
+    if (script?.dataset.loaded === 'true') return resolve();
+    if (script?.dataset.failed === 'true') {
+      script.remove();
+      script = null;
+    }
+    const target = script ?? document.createElement('script');
+    const done = () => { target.dataset.loaded = 'true'; resolve(); };
+    const fail = () => { target.dataset.failed = 'true'; reject(new Error(`Could not load ${marker}. Check your internet connection and try again.`)); };
+    target.addEventListener('load', done, { once: true });
+    target.addEventListener('error', fail, { once: true });
+    if (!script) {
+      target.src = src;
+      target.async = true;
+      target.dataset.cbtLoader = marker;
+      document.head.appendChild(target);
     }
   });
 }
