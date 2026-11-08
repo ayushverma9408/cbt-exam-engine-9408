@@ -48,7 +48,7 @@ const entries: BankQuestion[] = [
   },
   {
     id: 'math-cal-001', subject: 'Mathematics', topic: 'Limits & Derivatives', subtopic: 'Basic differentiation', difficulty: 'Easy',
-    question: { id: 'math-cal-001', type: 'single', text: 'For f(x) = 3x² − 5x + 2, the value of f′(2) is:', options: [{ id: 'a', text: '5' }, { id: 'b', text: '7' }, { id: 'c', text: '9' }, { id: 'd', text: '12' }], answer: 'c', solution: 'f′(x) = 6x − 5, so f′(2) = 12 − 5 = 7. Correct option: b.' },
+    question: { id: 'math-cal-001', type: 'single', text: 'For f(x) = 3x² − 5x + 2, the value of f′(2) is:', options: [{ id: 'a', text: '5' }, { id: 'b', text: '7' }, { id: 'c', text: '9' }, { id: 'd', text: '12' }], answer: 'b', solution: 'f′(x) = 6x − 5, so f′(2) = 12 − 5 = 7.' },
   },
   {
     id: 'math-mat-002', subject: 'Mathematics', topic: 'Matrices & Determinants', subtopic: 'Determinant of 2×2 matrix', difficulty: 'Easy',
