@@ -131,14 +131,14 @@ export function QuestionBank({ onCreate, onCancel }: { onCreate: (exam: ExamDef)
         {filtered.map((entry) => {
           const checked = selected.includes(entry.id);
           return (
-            <article key={entry.id} className={\`rounded-xl border bg-white p-4 transition-colors \${checked ? 'border-brand ring-1 ring-brand/20' : 'border-line'}\`}>
+            <article key={entry.id} className={`rounded-xl border bg-white p-4 transition-colors ${checked ? 'border-brand ring-1 ring-brand/20' : 'border-line'}`}>
               <div className="flex items-start gap-3">
-                <input type="checkbox" aria-label={\`Select \${entry.id}\`} checked={checked} onChange={() => toggle(entry.id)} className="mt-1 h-4 w-4 accent-[var(--color-brand)]" />
+                <input type="checkbox" aria-label={`Select ${entry.id}`} checked={checked} onChange={() => toggle(entry.id)} className="mt-1 h-4 w-4 accent-[var(--color-brand)]" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <span className="font-semibold text-brand">{entry.subject}</span>
                     <span className="text-muted">· {entry.topic} / {entry.subtopic}</span>
-                    <span className={\`rounded-full px-2 py-0.5 \${entry.difficulty === 'Easy' ? 'bg-green-50 text-green-700' : entry.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700'}\`}>{entry.difficulty}</span>
+                    <span className={`rounded-full px-2 py-0.5 ${entry.difficulty === 'Easy' ? 'bg-green-50 text-green-700' : entry.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700'}`}>{entry.difficulty}</span>
                     <span className="rounded-full bg-page px-2 py-0.5 text-muted">{entry.question.type === 'single' ? 'MCQ' : entry.question.type === 'multiple' ? 'MSQ' : 'Numerical'}</span>
                   </div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-ink">{entry.question.text}</p>

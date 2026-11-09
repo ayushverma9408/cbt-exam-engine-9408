@@ -22,7 +22,16 @@ export function ExamRoom({
   const all = useMemo(() => flatQuestions(exam), [exam]);
   const q = all.find((x) => x.id === attempt.current);
   const section = q ? exam.sections.find((s) => s.id === q.sectionId) : undefined;
-  if (!q || !section || !attempt.questions[q.id]) {
+  const currentState = q ? attempt.questions[q.id] : undefined;
+  const [confirming, setConfirming] = useState(false);
+  const remaining = useCountdown(attempt.endsAt);
+
+  // Auto-submit when time runs out, but keep hooks unconditional for invalid restores.
+  useEffect(() => {
+    if (q && section && currentState && remaining <= 0) dispatch({ type: 'submit', now: attempt.endsAt });
+  }, [remaining, dispatch, attempt.endsAt, q, section, currentState]);
+
+  if (!q || !section || !currentState) {
     return (
       <main className="grid min-h-screen place-items-center bg-page p-6">
         <section role="alert" className="max-w-lg rounded-2xl border border-danger/30 bg-white p-6">
@@ -32,15 +41,8 @@ export function ExamRoom({
       </main>
     );
   }
-  const state = attempt.questions[q.id];
+  const state = currentState;
   const marking = q.marking ?? section.marking;
-  const [confirming, setConfirming] = useState(false);
-  const remaining = useCountdown(attempt.endsAt);
-
-  // Auto-submit when time runs out.
-  useEffect(() => {
-    if (remaining <= 0) dispatch({ type: 'submit', now: attempt.endsAt });
-  }, [remaining, dispatch, attempt.endsAt]);
 
   const act = (type: 'save-next' | 'mark-next' | 'save-mark-next') => dispatch({ type, now: timestamp() });
   const goto = (id: string) => dispatch({ type: 'goto', id, now: timestamp() });
