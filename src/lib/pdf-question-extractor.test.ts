@@ -23,6 +23,19 @@ describe('PDF question text parsing', () => {
     expect(questions[1].options[1]).toBe('1');
   });
 
+  it('removes the number from a single-question MCQ draft', () => {
+    const questions = parseQuestionText([
+      'Question 7. Which quantity is conserved in an isolated system?',
+      '(A) Momentum',
+      '(B) Temperature',
+      '(C) Pressure',
+      '(D) Volume',
+    ].join('\n'));
+    expect(questions).toHaveLength(1);
+    expect(questions[0].stem).toBe('Which quantity is conserved in an isolated system?');
+    expect(questions[0].options).toEqual(['Momentum', 'Temperature', 'Pressure', 'Volume']);
+  });
+
   it('keeps an unnumbered scanned question as a reviewable draft', () => {
     const questions = parseQuestionText('Calculate the determinant of [[2, 1], [3, 4]].');
     expect(questions).toEqual([{ stem: 'Calculate the determinant of [[2, 1], [3, 4]].', options: [] }]);
