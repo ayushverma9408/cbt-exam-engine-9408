@@ -1,4 +1,5 @@
-import { parseExam, type QuestionDef } from '../engine/schema';
+import { z } from 'zod';
+import { parseExam, Question, type QuestionDef } from '../engine/schema';
 
 export type Subject = 'Physics' | 'Chemistry' | 'Mathematics';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -76,7 +77,44 @@ const entries: BankQuestion[] = [
   },
 ];
 
+const BankEntry = z.object({
+  id: z.string().trim().min(1),
+  subject: z.enum(['Physics', 'Chemistry', 'Mathematics']),
+  topic: z.string().trim().min(1),
+  subtopic: z.string().trim().min(1),
+  difficulty: z.enum(['Easy', 'Medium', 'Hard']),
+  question: Question,
+}).superRefine((entry, ctx) => {
+  if (entry.id !== entry.question.id) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Bank metadata ID must match the exam question ID.',
+      path: ['question', 'id'],
+    });
+  }
+});
+
+const metadataValidation = z.array(BankEntry).superRefine((bank, ctx) => {
+  const ids = new Set<string>();
+  bank.forEach((entry, index) => {
+    if (ids.has(entry.id)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Duplicate question-bank ID "' + entry.id + '".',
+        path: [index, 'id'],
+      });
+    }
+    ids.add(entry.id);
+  });
+}).safeParse(entries);
+
+if (!metadataValidation.success) {
+  const errors = metadataValidation.error.issues.map((issue) => issue.path.join('.') + ': ' + issue.message);
+  throw new Error('Invalid JEE question-bank metadata: ' + errors.join('; '));
+}
+
 // Validate the complete bundled bank through the same exam schema used by imports.
+const validatedEntries = metadataValidation.data;
 const validation = parseExam({
   id: 'jee-bank-validation',
   title: 'JEE question bank validation',
@@ -85,12 +123,9 @@ const validation = parseExam({
     id: subject.toLowerCase(),
     name: subject,
     marking: { correct: 4, incorrect: 1, partial: false },
-    questions: entries.filter((entry) => entry.subject === subject).map((entry) => entry.question),
+    questions: validatedEntries.filter((entry) => entry.subject === subject).map((entry) => entry.question),
   })),
 });
-if (!validation.ok) throw new Error(`Invalid bundled JEE question bank: ${validation.errors.join('; ')}`);
+if (!validation.ok) throw new Error('Invalid bundled JEE question bank: ' + validation.errors.join('; '));
 
-const ids = new Set(entries.map((entry) => entry.id));
-if (ids.size !== entries.length) throw new Error('Duplicate question-bank metadata IDs detected.');
-
-export const JEE_QUESTION_BANK = entries;
+export const JEE_QUESTION_BANK: BankQuestion[] = validatedEntries;
