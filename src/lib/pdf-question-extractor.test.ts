@@ -14,7 +14,7 @@ describe('PDF question text parsing', () => {
       '(B) 1',
       '(C) 2',
       '(D) 18',
-    ].join('\n');
+    ].join('\\n');
     const questions = parseQuestionText(text);
     expect(questions).toHaveLength(2);
     expect(questions[0].stem).toContain('uniform acceleration');
@@ -30,7 +30,24 @@ describe('PDF question text parsing', () => {
       '(B) Temperature',
       '(C) Pressure',
       '(D) Volume',
-    ].join('\n'));
+    ].join('\\n'));
+    expect(questions).toHaveLength(1);
+    expect(questions[0].stem).toBe('Which quantity is conserved in an isolated system?');
+    expect(questions[0].options).toEqual(['Momentum', 'Temperature', 'Pressure', 'Volume']);
+  });
+
+  it('drops a PDF page header and ignores a trailing numbered answer key', () => {
+    const questions = parseQuestionText([
+      'JEE Main 2026',
+      'Physics Section',
+      'Question 7. Which quantity is conserved in an isolated system?',
+      '(A) Momentum',
+      '(B) Temperature',
+      '(C) Pressure',
+      '(D) Volume',
+      'Answer Key',
+      '7. A',
+    ].join('\\n'));
     expect(questions).toHaveLength(1);
     expect(questions[0].stem).toBe('Which quantity is conserved in an isolated system?');
     expect(questions[0].options).toEqual(['Momentum', 'Temperature', 'Pressure', 'Volume']);
