@@ -60,21 +60,21 @@ function loadScript(src: string, marker: string): Promise<void> {
 /** Splits extracted PDF/OCR text into editable question drafts. It never guesses answer keys. */
 export function parseQuestionText(input: string): ExtractedQuestion[] {
   const normalized = input
-    .replace(/-\\s*\\n\\s*/g, '')
-    .replace(/[\\t\\r]+/g, ' ')
-    .replace(/\\u00a0/g, ' ')
+    .replace(/-\s*\n\s*/g, '')
+    .replace(/[\t\r]+/g, ' ')
+    .replace(/\u00a0/g, ' ')
     .replace(/[ ]{2,}/g, ' ')
     .trim();
   if (!normalized) return [];
 
   // Answer-key and solution pages often repeat numbered entries (for example, "1. B").
   // Exclude that trailing section so it cannot become a set of fake question drafts.
-  const answerKeyHeading = /(?:^|\\n)\\s*(?:ANSWER\\s*KEY|ANSWERS?|KEY\\s+TO\\s+ANSWERS|SOLUTIONS?|CORRECT\\s+ANSWERS?)\\b[^\\n]*(?:\\n|$)/i;
+  const answerKeyHeading = /(?:^|\n)\s*(?:ANSWER\s*KEY|ANSWERS?|KEY\s+TO\s+ANSWERS|SOLUTIONS?|CORRECT\s+ANSWERS?)\b[^\n]*(?:\n|$)/i;
   const answerKeyMatch = answerKeyHeading.exec(normalized);
   const text = (answerKeyMatch ? normalized.slice(0, answerKeyMatch.index) : normalized).trim();
   if (!text) return [];
 
-  const starts = [...text.matchAll(/(?:^|\\n)\\s*(?:Q(?:uestion)?\\s*)?(\\d{1,3})[.)]\\s+/gim)];
+  const starts = [...text.matchAll(/(?:^|\n)\s*(?:Q(?:uestion)?\s*)?(\d{1,3})[.)]\s+/gim)];
   const blocks: string[] = [];
   if (starts.length > 0) {
     for (let i = 0; i < starts.length; i++) {
@@ -88,15 +88,15 @@ export function parseQuestionText(input: string): ExtractedQuestion[] {
   }
 
   return blocks.map((block) => {
-    const optionPattern = /^\\s*(?:\\(([A-D])\\)|([A-D])[).])\\s*/gim;
+    const optionPattern = /^\s*(?:\(([A-D])\)|([A-D])[).])\s*/gim;
     const matches = [...block.matchAll(optionPattern)];
-    if (matches.length < 2) return { stem: block.replace(/^(?:Q(?:uestion)?\\s*)?\\d{1,3}[.)]\\s*/i, '').trim(), options: [] };
+    if (matches.length < 2) return { stem: block.replace(/^(?:Q(?:uestion)?\s*)?\d{1,3}[.)]\s*/i, '').trim(), options: [] };
 
-    const stem = block.slice(0, matches[0].index ?? 0).replace(/^(?:Q(?:uestion)?\\s*)?\\d{1,3}[.)]\\s*/i, '').trim();
+    const stem = block.slice(0, matches[0].index ?? 0).replace(/^(?:Q(?:uestion)?\s*)?\d{1,3}[.)]\s*/i, '').trim();
     const options = matches.map((match, index) => {
       const start = (match.index ?? 0) + match[0].length;
       const end = index + 1 < matches.length ? matches[index + 1].index ?? block.length : block.length;
-      return block.slice(start, end).replace(/\\s+/g, ' ').trim();
+      return block.slice(start, end).replace(/\s+/g, ' ').trim();
     }).filter(Boolean);
     return { stem: stem || block.slice(0, matches[0].index ?? 0).trim(), options };
   }).filter((question) => question.stem.length > 0);
@@ -124,8 +124,8 @@ export async function extractQuestionsFromPdf(
       onProgress({ page: pageNumber, total: documentPdf.numPages, stage: 'reading' });
       const page = await documentPdf.getPage(pageNumber);
       const content = await page.getTextContent();
-      const selectableText = content.items.map((item) => item.str ?? '').join('\\n').replace(/[ \\t]+/g, ' ').trim();
-      const hasQuestionStructure = /(?:^|\\n)\\s*(?:Q(?:uestion)?\\s*)?\\d{1,3}[.)]\\s+|(?:^|\\n)\\s*(?:\\([A-D]\\)|[A-D][).])\\s+/im.test(selectableText);
+      const selectableText = content.items.map((item) => item.str ?? '').join('\n').replace(/[ \t]+/g, ' ').trim();
+      const hasQuestionStructure = /(?:^|\n)\s*(?:Q(?:uestion)?\s*)?\d{1,3}[.)]\s+|(?:^|\n)\s*(?:\([A-D]\)|[A-D][).])\s+/im.test(selectableText);
       if (selectableText.length >= 60 && hasQuestionStructure) {
         pages.push(selectableText);
         continue;
@@ -153,7 +153,7 @@ export async function extractQuestionsFromPdf(
     if (ocrWorker) await ocrWorker.terminate();
   }
 
-  const questions = parseQuestionText(pages.join('\\n'));
+  const questions = parseQuestionText(pages.join('\n'));
   if (!questions.length) throw new Error('No question text could be detected. Try a clearer PDF or a higher-quality scan.');
   return questions;
 }
