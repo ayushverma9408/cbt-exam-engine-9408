@@ -68,7 +68,12 @@ export function scoreQuestion(
     }
 
     case 'multiple': {
-      const chosen = new Set(Array.isArray(response) ? response : [String(response)]);
+      const selected = Array.isArray(response) ? response : [String(response)];
+      const optionIds = new Set(q.options.map((option) => option.id));
+      if (selected.some((id) => !optionIds.has(id)) || new Set(selected).size !== selected.length) {
+        return { outcome: 'incorrect', marks: -marking.incorrect };
+      }
+      const chosen = new Set(selected);
       const correct = new Set(q.answer);
       const wrongPicked = [...chosen].some((c) => !correct.has(c));
       if (wrongPicked) return { outcome: 'incorrect', marks: -marking.incorrect };
@@ -135,7 +140,8 @@ export function scoreAttempt(exam: ExamDef, attempt: AttemptState): ExamResult {
     questions,
     attempted,
     accuracy: attempted ? round2((correct / attempted) * 100) : 0,
-    timeTakenMs: (attempt.submittedAt ?? attempt.endsAt) - attempt.startedAt,
+    // Clamp imported or stale persisted timestamps to the configured exam window.
+    timeTakenMs: Math.max(0, Math.min(attempt.endsAt, attempt.submittedAt ?? attempt.endsAt) - attempt.startedAt),
     negativeMarks: round2(-questions.filter((q) => q.marks < 0).reduce((n, q) => n + q.marks, 0)),
   };
 }

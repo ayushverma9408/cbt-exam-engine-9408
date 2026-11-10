@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import aptitude from '../data/aptitude-mock.json';
 import quick from '../data/quick-demo.json';
+import { JEE_QUESTION_BANK } from '../data/jee-question-bank';
 import { reduce, startAttempt, statusCounts, type AttemptState } from './attempt';
 import { parseExam, type ExamDef } from './schema';
 import { scoreAttempt, scoreQuestion } from './scoring';
@@ -92,6 +93,34 @@ describe('schema', () => {
     });
     expect(dup.ok).toBe(false);
   });
+
+  it('rejects duplicate section and option ids', () => {
+    const duplicateSections = parseExam({ ...E, sections: [E.sections[0], E.sections[0]] });
+    expect(duplicateSections.ok).toBe(false);
+
+    const first = E.sections[0].questions[0];
+    const duplicateOptions = parseExam({
+      ...E,
+      sections: [{
+        ...E.sections[0],
+        questions: [{
+          ...first,
+          options: [{ id: 'same', text: 'A' }, { id: 'same', text: 'B' }],
+          answer: 'same',
+        }],
+      }],
+    });
+    expect(duplicateOptions.ok).toBe(false);
+  });
+
+  it('rejects duplicate answers in a multiple-correct question', () => {
+    const multiple = E.sections[1].questions[0];
+    const duplicateAnswers = parseExam({
+      ...E,
+      sections: [{ ...E.sections[1], questions: [{ ...multiple, answer: ['a', 'a'] }] }],
+    });
+    expect(duplicateAnswers.ok).toBe(false);
+  });
 });
 
 describe('scoreQuestion', () => {
@@ -113,6 +142,8 @@ describe('scoreQuestion', () => {
     expect(scoreQuestion(q3, marking, ['a'])).toEqual({ outcome: 'partial', marks: 2 });
     expect(scoreQuestion(q3, marking, ['a', 'c'])).toEqual({ outcome: 'incorrect', marks: -2 });
     expect(scoreQuestion(q3, { ...marking, partial: false }, ['a']).outcome).toBe('incorrect');
+    expect(scoreQuestion(q3, marking, ['a', 'a', 'b']).outcome).toBe('incorrect');
+    expect(scoreQuestion(q3, marking, ['a', 'unknown']).outcome).toBe('incorrect');
   });
 });
 
@@ -172,6 +203,41 @@ describe('attempt reducer', () => {
     const s = run({ type: 'draft', value: 'b' }, { type: 'save-next', now: t0 + 1 }, { type: 'submit', now: t0 + 2 });
     expect(scoreAttempt(E, s).percentage).toBe(0);
   });
+
+  it('saves a selected answer when using Mark for Review & Next', () => {
+    const start = startAttempt(E, t0);
+    const drafted = reduce(E, start, { type: 'draft', value: 'a' });
+    const marked = reduce(E, drafted, { type: 'mark-next', now: t0 + 1_000 });
+    expect(marked.questions.q1).toMatchObject({
+      status: 'answered-marked',
+      response: 'a',
+      draft: 'a',
+    });
+  });
+
+  it('does not commit option IDs that are not part of the question', () => {
+    const start = startAttempt(E, t0);
+    const drafted = reduce(E, start, { type: 'draft', value: 'not-an-option' });
+    const saved = reduce(E, drafted, { type: 'save-next', now: t0 + 1_000 });
+    expect(saved.questions.q1.response).toBeNull();
+    expect(saved.questions.q1.status).toBe('not-answered');
+  });
+
+  it('auto-submits at the deadline instead of accepting a late save', () => {
+    const start = startAttempt(E, t0);
+    const drafted = reduce(E, start, { type: 'draft', value: 'a' });
+    const lateSave = reduce(E, drafted, { type: 'save-next', now: start.endsAt + 5_000 });
+    expect(lateSave.submittedAt).toBe(start.endsAt);
+    expect(lateSave.questions.q1.response).toBeNull();
+    expect(lateSave.questions.q1.status).toBe('not-answered');
+  });
+
+  it('clamps manual submission time to the exam duration', () => {
+    const start = startAttempt(E, t0);
+    const submitted = reduce(E, start, { type: 'submit', now: start.endsAt + 30_000 });
+    expect(submitted.submittedAt).toBe(start.endsAt);
+    expect(scoreAttempt(E, submitted).timeTakenMs).toBe(start.endsAt - start.startedAt);
+  });
 });
 
 describe('bundled exams', () => {
@@ -200,5 +266,38 @@ describe('regression fixes', () => {
     const moved = reduce(E, drafted, { type: 'save-next', now: 11_000 });
     expect(moved.questions.q1.response).toBeNull();
     expect(moved.questions.q1.status).toBe('not-answered');
+  });
+});
+
+
+describe('JEE question bank', () => {
+  it('contains original questions across all three JEE subjects', () => {
+    expect(JEE_QUESTION_BANK).toHaveLength(15);
+    expect(new Set(JEE_QUESTION_BANK.map((question) => question.id)).size).toBe(15);
+    expect(new Set(JEE_QUESTION_BANK.map((question) => question.subject))).toEqual(
+      new Set(['Physics', 'Chemistry', 'Mathematics']),
+    );
+  });
+
+  it('keeps every bank question valid under the production exam schema', () => {
+    const parsed = parseExam({
+      id: 'bank-test',
+      title: 'Bank validation',
+      durationMinutes: 30,
+      sections: (['Physics', 'Chemistry', 'Mathematics'] as const).map((subject) => ({
+        id: subject.toLowerCase(),
+        name: subject,
+        marking: { correct: 4, incorrect: 1, partial: false },
+        questions: JEE_QUESTION_BANK.filter((entry) => entry.subject === subject).map((entry) => entry.question),
+      })),
+    });
+    expect(parsed.ok).toBe(true);
+  });
+
+  it('has the correct derivative answer and numeric work-energy value', () => {
+    const derivative = JEE_QUESTION_BANK.find((entry) => entry.id === 'math-cal-001');
+    const workEnergy = JEE_QUESTION_BANK.find((entry) => entry.id === 'phy-wpe-003');
+    expect(derivative?.question).toMatchObject({ type: 'single', answer: 'b' });
+    expect(workEnergy?.question).toMatchObject({ type: 'numeric', answer: 3 * Math.sqrt(2) });
   });
 });
