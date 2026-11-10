@@ -14,7 +14,7 @@ describe('PDF question text parsing', () => {
       '(B) 1',
       '(C) 2',
       '(D) 18',
-    ].join('\\n');
+    ].join('\n');
     const questions = parseQuestionText(text);
     expect(questions).toHaveLength(2);
     expect(questions[0].stem).toContain('uniform acceleration');
@@ -30,7 +30,7 @@ describe('PDF question text parsing', () => {
       '(B) Temperature',
       '(C) Pressure',
       '(D) Volume',
-    ].join('\\n'));
+    ].join('\n'));
     expect(questions).toHaveLength(1);
     expect(questions[0].stem).toBe('Which quantity is conserved in an isolated system?');
     expect(questions[0].options).toEqual(['Momentum', 'Temperature', 'Pressure', 'Volume']);
@@ -47,7 +47,7 @@ describe('PDF question text parsing', () => {
       '(D) Volume',
       'Answer Key',
       '7. A',
-    ].join('\\n'));
+    ].join('\n'));
     expect(questions).toHaveLength(1);
     expect(questions[0].stem).toBe('Which quantity is conserved in an isolated system?');
     expect(questions[0].options).toEqual(['Momentum', 'Temperature', 'Pressure', 'Volume']);
